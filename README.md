@@ -1,5 +1,9 @@
 # divalto-jira
-v0.1 - Divalto jira reports using jiraone
+Divalto jira reports using jiraone
+Both files are useful for stats_jira.py is meant for tests and history purpose only.
+Use stats_jira_v2.py instead.
+
+v0.1 (Actual)
 
 Requirements : 
 --------------
