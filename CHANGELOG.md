@@ -6,7 +6,9 @@ v0.1
 
     27 Sep 2022
 
-    project initialization
+    note: project initialization
     params: added the 5 Divalto entities
-    feat: add jiraone change_log for tickets history and export_issues function for jira issues content
-    feat: all entities have their dedicated files for _History and _Issues in Divalto directory
+    feat: added jiraone change_log for issues history 
+    feat: added jiraone export_issues for issues content
+    note: all entities have their dedicated files for _History and _Issues in Divalto directory
+    feat: added ALL option to generate files for ALL Divalto entities

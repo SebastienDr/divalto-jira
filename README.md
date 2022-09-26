@@ -7,6 +7,7 @@ Python >= 3.6
 
 Usage :
 -------
+
     1. Taper `python stats_jira_v2.py` dans la console
     2. Suivez les instructions à l'écran
     3. Actuellement les fichiers se retrouvent à la racine dans le répertoire \Divalto
