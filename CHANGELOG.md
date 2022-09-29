@@ -22,3 +22,4 @@ v0.2
     knownbug : R&D jql is not working properly because of special characters ~ not parsed correctly
     note: removed ALL option as it did not seem relevant
     note: refactoring of interface => less hardcoded stuff
+    knownbug: if 0 issues are found through jql, program crashes
