@@ -128,25 +128,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /.idea/.gitignore
-/logs/app.log.1
-/logs/app.log.2
-/logs/app.log.3
-/logs/app.log.4
+/logs/*
 /.idea/divalto-jira.iml
-/Divalto/FIN_Historique.txt
-/Divalto/FIN_Tickets.txt
-/Divalto/Finance_Tickets.txt
-/Divalto/INFRA_Historique.txt
-/Divalto/Infra_Tickets.txt
-/Divalto/iter_saves.json
+/Divalto/*
 /.idea/misc.xml
 /.idea/modules.xml
-/Divalto/perso_Historique.txt
-/Divalto/perso_Tickets.txt
 /.idea/inspectionProfiles/profiles_settings.xml
-/Divalto/R&D_Historique.txt
-/Divalto/SOE_Historique.txt
-/Divalto/SOE_Tickets.txt
-/Divalto/SOI_Historique.txt
-/Divalto/SOI_Tickets.txt
 /.idea/vcs.xml
