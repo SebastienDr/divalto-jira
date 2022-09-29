@@ -1,7 +1,6 @@
 # divalto-jira
-Divalto jira reports using jiraone
-Both files are useful for stats_jira.py is meant for tests and history purpose only. Will be REMOVED shortly.
-Use stats_jira_v2.py instead.
+Extract de données di JIRA pour Divalto
+Use stats_jira_v2.py.
 
 v0.2 (Actual)
 

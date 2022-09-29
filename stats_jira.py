@@ -1,18 +1,164 @@
 from jiraone import LOGIN, PROJECT
-import csv
+from datetime import datetime
 
-user = "sdrouard.ext"
-password = "SOP1_Avecesar1"
-link = "https://jira.soprema.ca"
-LOGIN.api = False  # comment out line, if you want to extract history from a cloud instance
-LOGIN(user=user, password=password, url=link)
 
-if __name__ == '__main__':
-      projectDivalto = "project = DIVALTO AND"
-      # the output of the file would be absolute to the directory where this python file is being executed from
-      #jql = projectDivalto + " Sprint in (255, 257, 258, 265, 267, 272, 273, 282, 290, 292, 295, 296, 297, 305, 319)" # Sprints 2 à 16 - SOE
-      #jql = projectDivalto + " Sprint in (275, 277, 283, 298, 304, 320, 325)" # Sprints 1 à 7 - Finance
-      #jql = projectDivalto + " Sprint in (262, 263, 266, 271, 274, 281, 289, 291, 299, 306, 307, 317, 321, 324)" # Sprint SOI-Eu
-      jql = projectDivalto + " Sprint in (293, 300, 308, 310, 318, 322, 330)" # Sprints SopCa
-      PROJECT.change_log(jql=jql)
+# L'action à réaliser pour extraire des données (1er filtre)
+def what_action() -> str:
+    global context
+    print(context, "Que voulez-vous faire ? :")
+    print(context, "     1 - Extraction des tickets")
+    print(context, "     2 - Extraction de l'historique des tickets")
+    choix = int(input('Choix [2] : ') or 2)
+    if choix == 1:
+        context.append("Tickets")
+        return "tickets"
+    else:
+        context.append("Historique")
+        return "histo"
 
+
+# Sur quel pole on va réaliser l'action (2ème filtre)
+def what_pole() -> str:
+    global context
+    print(context, "Pour quel pôle voulez-vous extraire les données ?", ' - '.join(poles))
+    print(context, "ou pour un JQL personnalisé : [perso]")
+    chosenPole: str = str(input('Pôle [perso] : ') or "perso")
+    if chosenPole != "perso":
+        print(context, "==> Extraction du pole", chosenPole, "...")
+    else:
+        print(context, "==> Extraction personnalisée...")
+
+    context.append(chosenPole)
+    return chosenPole
+
+
+def what_sprint() -> str:
+    global context, sprints
+    print(context, "Sur quel(s) sprint(s) ? :")
+    print(context, "1 - Tous depuis le début".rjust(5))
+    print(context, "2 - Personnalisés - en liste séparé par des ',' (Ex : 215,217,233) -".rjust(5))
+    sprints = str(input('Choix [Tous] : ') or "Tous")
+    context.append(sprints)
+
+    return sprints
+
+
+# Sur quelle période on sélectionne les données (3eme filtre)
+def what_time(pole) -> int:
+    global context
+    if pole != "perso":
+        print(context, "Sur quelle période ? :")
+        print(context, "1 - Le dernier jour".rjust(5))
+        print(context, "2 - Limité aux 2 dernières semaines".rjust(5))
+        print(context, "3 - Depuis le début des sprints".rjust(5))
+        print(context, "Autre - Personnalisée".rjust(5))
+        choix = int(input('Choix [3] : ') or 3)
+        return choix
+    return 3
+
+
+def defineJql() -> str:
+    if pole == "perso":
+        persoJql = str(input('JQL personnalisé : '))
+        return persoJql
+    else:
+        sprintIn = "Sprint in "
+        projectDivalto = "project = DIVALTO AND "
+        # Filtre sur les sprints du pole
+        if pole == 'SOE':
+            if sprints == "Tous":
+                filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOE)) + ")"
+            else:
+                filterIssues = sprintIn + "(" + ", ".join(map(str, sprints)) + ")"
+            # Sprints 2 à 16 - SOE
+        elif pole == 'FIN':
+            filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsFIN)) + ")"
+            # Sprints 1 à 7 - Finance
+        elif pole == 'SOI':
+            filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOI)) + ")"
+            # Sprints SOI-Eu
+        elif pole == 'SOPCA':
+            filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOPCA)) + ")"
+            # Sprints SopCa
+        elif pole == 'INFRA':
+            filterIssues = "labels = DIVALTO_INFRA AND statusCategory not in (Done)"
+        elif pole == 'R&D':
+            # not working
+            filterIssues = "((text \~ \"R&D\" OR text \~ \"agil?o\") AND (text \~ Ticket OR text \~ Demande) OR text \~ \"EDITEUR/STANDARD\") AND status not in (CLOSED, Done, Fermé, Cancelled, \"Ready for UAT\", \"UAT\") "
+        else:
+            filterIssues = ""
+
+        # Filtre sur la période
+        if time == 1:
+            timeStr = " AND (updated > -1d OR updatedDate > -1d)"
+        elif time == 2:
+            timeStr = " AND (updated > -14d OR updatedDate > -14d)"
+        elif time == 3:
+            timeStr = ""
+        else:
+            jours = int(input('Depuis combien de jours ? [15] : ') or 15)
+            timeStr = " AND (updated > -" + str(jours) + "d OR updatedDate > -" + str(jours) + "d)"
+
+        jql = projectDivalto + filterIssues + timeStr
+    return jql
+
+
+# Tickets
+def exportIssues(p):
+    text = [dateCourante, str(p), "Tickets"]
+    fileName = '_'.join(text) + extension  # Fichier de sortie des données des tickets
+    print(fileName)
+    PROJECT.export_issues(jql=jql, folder=destinationFolder, final_file=fileName)
+
+
+# Historique des tickets
+def exportHistorique(p):
+    text = [dateCourante, str(p), "Historique"]
+    fileNameHisto = '_'.join(text)  # Fichier de sortie des données de l'historique des tickets
+    PROJECT.change_log(jql=jql, folder=destinationFolder, file=fileNameHisto + extension)
+
+
+# Programme principal
+if __name__ == "__main__":
+
+    # Connexion à JIRA
+    user = "sdrouard.ext"
+    password = "SOP1_Avecesar1"
+    link = "https://jira.soprema.ca"
+    LOGIN.api = False  # comment out line, if you want to extract history from a cloud instance
+    LOGIN(user=user, password=password, url=link)
+
+    # Gestion des fichiers
+    destinationFolder = "Divalto"
+    extension = ".txt"  # Pour le moment : pour éviter les problèmes d'encoding
+    context = []
+
+    # Liste des pôles
+    poles = ['SOI', 'SOE', 'FIN', 'SOPCA', 'INFRA', 'R&D']
+    # Et leur sprints actuels
+    sprintsSOE = [255, 257, 258, 265, 267, 272, 273, 282, 290, 292, 295, 296, 297, 305, 319]
+    sprintsSOI = [262, 263, 266, 271, 274, 281, 289, 291, 299, 306, 307, 317, 321, 324]
+    sprintsFIN = [275, 277, 283, 298, 304, 320, 325]
+    sprintsSOPCA = [293, 300, 308, 310, 318, 322, 330]
+
+    # Date courante avec heure
+    dateCourante = datetime.now().strftime("%d-%m-%YT%H-%M-%S")
+
+    # Show "logo"
+    print("=====================================================================================================")
+    print("                                     ", "Divalto JIRA", "                                         ")
+    print("=====================================================================================================")
+    print("Date :", dateCourante)
+
+    # Changement de la structure d'appel - v0.2
+    action = what_action()
+    pole = what_pole()
+    sprints = what_sprint()
+    time = what_time(pole)
+    jql = defineJql()
+    print(context, "JQL : ", jql)
+    match action:
+        case "tickets":
+            exportIssues(pole)
+        case "histo":
+            exportHistorique(pole)
