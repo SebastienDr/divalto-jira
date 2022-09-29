@@ -22,4 +22,11 @@ v0.2
     knownbug : R&D jql is not working properly because of special characters ~ not parsed correctly
     note: removed ALL option as it did not seem relevant
     note: refactoring of interface => less hardcoded stuff
+
+v0.3
+
+    29 Sep 2022
     knownbug: if 0 issues are found through jql, program crashes
+    feat: added choose sprint option
+    note: removed R&D pole
+    feat: added timestamp to files extracts
