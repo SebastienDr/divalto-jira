@@ -6,13 +6,15 @@ from datetime import datetime
 def what_action() -> str:
     global context
     print(context, "Que voulez-vous faire ? :")
-    print(context, "     1 - Extraction des tickets")
-    print(context, "     2 - Extraction de l'historique des tickets")
+    print(context, "1 - Extraction des tickets".rjust(5))
+    print(context, "2 - Extraction de l'historique des tickets".rjust(5))
     choix = int(input('Choix [2] : ') or 2)
     if choix == 1:
+        print("=====> Extraction des tickets")
         context.append("Tickets")
         return "tickets"
     else:
+        print("=====> Extraction de l'historique")
         context.append("Historique")
         return "histo"
 
@@ -24,26 +26,28 @@ def what_pole() -> str:
     print(context, "ou pour un JQL personnalisé : [perso]")
     chosenPole: str = str(input('Pôle [perso] : ') or "perso")
     if chosenPole != "perso":
-        print(context, "==> Extraction du pole", chosenPole, "...")
+        print("=====> Sur le pole", chosenPole, "...")
     else:
-        print(context, "==> Extraction personnalisée...")
+        print("=====> Via un JQL personnalisé...")
 
     context.append(chosenPole)
     return chosenPole
 
 
+# Sur quels sprints on sélectionne les données (3eme filtre)
 def what_sprint() -> str:
     global context, sprints
     print(context, "Sur quel(s) sprint(s) ? :")
-    print(context, "1 - Tous depuis le début".rjust(5))
+    print(context, "1 - Tous".rjust(5))
     print(context, "2 - Personnalisés - en liste séparé par des ',' (Ex : 215,217,233) -".rjust(5))
     sprints = str(input('Choix [Tous] : ') or "Tous")
+    print("=====> Extraction des sprints :", sprints)
     context.append(sprints)
 
     return sprints
 
 
-# Sur quelle période on sélectionne les données (3eme filtre)
+# Sur quelle période on sélectionne les données (4eme filtre)
 def what_time(pole) -> int:
     global context
     if pole != "perso":
@@ -59,34 +63,37 @@ def what_time(pole) -> int:
 
 def defineJql() -> str:
     if pole == "perso":
-        persoJql = str(input('JQL personnalisé : '))
-        return persoJql
+        return str(input('JQL personnalisé : '))
     else:
         sprintIn = "Sprint in "
         projectDivalto = "project = DIVALTO AND "
-        # Filtre sur les sprints du pole
-        if pole == 'SOE':
-            if sprints == "Tous":
-                filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOE)) + ")"
-            else:
-                filterIssues = sprintIn + "(" + ", ".join(map(str, sprints)) + ")"
-            # Sprints 2 à 16 - SOE
-        elif pole == 'FIN':
-            filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsFIN)) + ")"
-            # Sprints 1 à 7 - Finance
-        elif pole == 'SOI':
-            filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOI)) + ")"
-            # Sprints SOI-Eu
-        elif pole == 'SOPCA':
-            filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOPCA)) + ")"
-            # Sprints SopCa
-        elif pole == 'INFRA':
-            filterIssues = "labels = DIVALTO_INFRA AND statusCategory not in (Done)"
-        elif pole == 'R&D':
-            # not working
-            filterIssues = "((text \~ \"R&D\" OR text \~ \"agil?o\") AND (text \~ Ticket OR text \~ Demande) OR text \~ \"EDITEUR/STANDARD\") AND status not in (CLOSED, Done, Fermé, Cancelled, \"Ready for UAT\", \"UAT\") "
-        else:
-            filterIssues = ""
+
+        # Filtre sur les poles
+        match pole:
+            case 'SOE':
+                if sprints == "Tous":
+                    filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOE)) + ")"
+                else:
+                    filterIssues = sprintIn + "(" + sprints + ")"
+            case 'FIN':
+                if sprints == "Tous":
+                    filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsFIN)) + ")"
+                else:
+                    filterIssues = sprintIn + "(" + sprints + ")"
+            case 'SOI':
+                if sprints == "Tous":
+                    filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOI)) + ")"
+                else:
+                    filterIssues = sprintIn + "(" + sprints + ")"
+            case 'SOPCA':
+                if sprints == "Tous":
+                    filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOPCA)) + ")"
+                else:
+                    filterIssues = sprintIn + "(" + sprints + ")"
+            case 'INFRA':
+                filterIssues = "labels = DIVALTO_INFRA AND statusCategory not in (Done)"
+            case _:
+                filterIssues = ""
 
         # Filtre sur la période
         if time == 1:
@@ -134,7 +141,7 @@ if __name__ == "__main__":
     context = []
 
     # Liste des pôles
-    poles = ['SOI', 'SOE', 'FIN', 'SOPCA', 'INFRA', 'R&D']
+    poles = ['SOI', 'SOE', 'FIN', 'SOPCA', 'INFRA']
     # Et leur sprints actuels
     sprintsSOE = [255, 257, 258, 265, 267, 272, 273, 282, 290, 292, 295, 296, 297, 305, 319]
     sprintsSOI = [262, 263, 266, 271, 274, 281, 289, 291, 299, 306, 307, 317, 321, 324]
