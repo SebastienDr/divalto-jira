@@ -1,13 +1,14 @@
 # divalto-jira
 Divalto jira reports using jiraone
-Both files are useful for stats_jira.py is meant for tests and history purpose only.
+Both files are useful for stats_jira.py is meant for tests and history purpose only. Will be REMOVED shortly.
 Use stats_jira_v2.py instead.
 
-v0.1 (Actual)
+v0.2 (Actual)
 
 Requirements : 
 --------------
 Python >= 3.6
+[JiraOne](https://pypi.org/project/jiraone/ "jiraone") installé
 
 Usage :
 -------
@@ -22,3 +23,7 @@ Usage :
     6. Choisir l'un des fichiers > Cliquer sur Charger
     7. Vos données sont importées !
 
+Note :
+------
+- Il faut modifier le reporting.py par défaut de Jiraone car il ne gère pas l'encoding de Windows correctement 
+(ou alors je n'ai pas encore compris comment lui forcer un encoding particulier)
