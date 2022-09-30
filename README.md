@@ -2,7 +2,9 @@
 Extract de données di JIRA pour Divalto
 Use stats_jira_v2.py.
 
-v0.2 (Actual)
+v0.1
+v0.2
+v0.3 (Actual)
 
 Requirements : 
 --------------
