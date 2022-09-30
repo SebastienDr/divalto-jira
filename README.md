@@ -6,8 +6,8 @@ v0.2 (Actual)
 
 Requirements : 
 --------------
-Python >= 3.6
-[JiraOne](https://pypi.org/project/jiraone/ "jiraone") installé
+- Python >= 3.6
+- [JiraOne](https://pypi.org/project/jiraone/ "jiraone") installé
 
 Usage :
 -------
