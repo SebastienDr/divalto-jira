@@ -1,7 +1,7 @@
 # divalto-jira
 Extract de données de JIRA pour Divalto. Use stats_jira.py.
 
-v0.3 (Actual)
+**v0.3 (Actual)**
 
 Requirements : 
 --------------
