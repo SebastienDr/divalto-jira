@@ -29,14 +29,14 @@ def what_pole() -> str:
     global context
     print(context, "Pour quel pôle voulez-vous extraire les données ?", ' - '.join(poles))
     print(context, "ou alors un JQL personnalisé : [perso]")
-    chosenPole: str = str(input('Pôle [perso] : ') or "perso")
-    if chosenPole != "perso":
-        print("=====> Sur le pole", chosenPole, "...")
+    chosen_pole: str = str(input('Pôle [perso] : ') or "perso")
+    if chosen_pole != "perso":
+        print("=====> Sur le pole", chosen_pole, "...")
     else:
         print("=====> Via un JQL personnalisé...")
 
-    context.append(chosenPole)
-    return chosenPole
+    context.append(chosen_pole)
+    return chosen_pole
 
 
 # Sur quels sprints on sélectionne les données (3eme filtre)
@@ -53,9 +53,9 @@ def what_sprint() -> str:
 
 
 # Sur quelle période on sélectionne les données (4eme filtre)
-def what_time(pole) -> int:
+def what_time(p) -> int:
     global context
-    if pole != "perso":
+    if p != "perso":
         print(context, "Sur quelle période ? :")
         print(context, "1 - Le dernier jour".rjust(5))
         print(context, "2 - Limité aux 2 dernières semaines".rjust(5))
@@ -66,74 +66,74 @@ def what_time(pole) -> int:
     return 3
 
 
-def defineJql() -> str:
+def define_jql() -> str:
     if pole == "perso":
         return str(input("JQL personnalisé : "))
     else:
-        sprintIn = "Sprint in "
-        projectDivalto = "project = DIVALTO AND "
+        sprint_in = "Sprint in "
+        project_divalto = "project = DIVALTO AND "
 
         # Filtre sur les poles
         match pole:
             case 'SOE':
                 if sprints == "Tous":
-                    filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOE)) + ")"
+                    filter_issues = sprint_in + "(" + ", ".join(map(str, sprintsSOE)) + ")"
                 else:
-                    filterIssues = sprintIn + "(" + sprints + ")"
+                    filter_issues = sprint_in + "(" + sprints + ")"
             case 'FIN':
                 if sprints == "Tous":
-                    filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsFIN)) + ")"
+                    filter_issues = sprint_in + "(" + ", ".join(map(str, sprintsFIN)) + ")"
                 else:
-                    filterIssues = sprintIn + "(" + sprints + ")"
+                    filter_issues = sprint_in + "(" + sprints + ")"
             case 'SOI':
                 if sprints == "Tous":
-                    filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOI)) + ")"
+                    filter_issues = sprint_in + "(" + ", ".join(map(str, sprintsSOI)) + ")"
                 else:
-                    filterIssues = sprintIn + "(" + sprints + ")"
+                    filter_issues = sprint_in + "(" + sprints + ")"
             case 'SOPCA':
                 if sprints == "Tous":
-                    filterIssues = sprintIn + "(" + ", ".join(map(str, sprintsSOPCA)) + ")"
+                    filter_issues = sprint_in + "(" + ", ".join(map(str, sprintsSOPCA)) + ")"
                 else:
-                    filterIssues = sprintIn + "(" + sprints + ")"
+                    filter_issues = sprint_in + "(" + sprints + ")"
             case 'INFRA':
-                filterIssues = "labels = DIVALTO_INFRA AND statusCategory not in (Done)"
+                filter_issues = "labels = DIVALTO_INFRA AND statusCategory not in (Done)"
             case _:
-                filterIssues = ""
+                filter_issues = ""
 
         # Filtre sur la période
         if time == 1:
-            timeStr = " AND (updated > -1d OR updatedDate > -1d)"
+            time_str = " AND (updated > -1d OR updatedDate > -1d)"
         elif time == 2:
-            timeStr = " AND (updated > -14d OR updatedDate > -14d)"
+            time_str = " AND (updated > -14d OR updatedDate > -14d)"
         elif time == 3:
-            timeStr = ""
+            time_str = ""
         else:
             jours = int(input('Depuis combien de jours ? [15] : ') or 15)
-            timeStr = " AND (updated > -" + str(jours) + "d OR updatedDate > -" + str(jours) + "d)"
+            time_str = " AND (updated > -" + str(jours) + "d OR updatedDate > -" + str(jours) + "d)"
 
-        jql = projectDivalto + filterIssues + timeStr
-    return jql
+        future_jql = project_divalto + filter_issues + time_str
+    return future_jql
 
 
 # Tickets
-def exportIssues(p):
+def export_issues(p):
     text = [dateCourante, str(p), "Tickets"]
-    fileName = '_'.join(text) + extension  # Fichier de sortie des données des tickets
-    print(fileName)
-    PROJECT.export_issues(jql=jql, folder=destinationFolder, final_file=fileName)
+    file_name = '_'.join(text) + extension  # Fichier de sortie des données des tickets
+    print(file_name)
+    PROJECT.export_issues(jql=jql, folder=destinationFolder, final_file=file_name)
 
 
 # Historique des tickets
-def exportHistorique(p):
+def export_historique(p):
     text = [dateCourante, str(p), "Historique"]
-    fileNameHisto = '_'.join(text)  # Fichier de sortie des données de l'historique des tickets
-    PROJECT.change_log(jql=jql, folder=destinationFolder, file=fileNameHisto + extension)
+    file_name_histo = '_'.join(text)  # Fichier de sortie des données de l'historique des tickets
+    PROJECT.change_log(jql=jql, folder=destinationFolder, file=file_name_histo + extension)
 
 
 # Programme principal
 if __name__ == "__main__":
 
-    with open(r'./properties/stats_jira.yaml', encoding='utf8') as file:
+    with open(r'properties/stats_jira.yaml', encoding='utf8') as file:
         # The FullLoader parameter handles the conversion from YAML
         # scalar values to Python the dictionary format
         # Chargement des propriétés du programme
@@ -178,10 +178,10 @@ if __name__ == "__main__":
             pole = what_pole()
             sprints = what_sprint()
             time = what_time(pole)
-            jql = defineJql()
+            jql = define_jql()
             print(context, "JQL : ", jql)
             match action:
                 case "tickets":
-                    exportIssues(pole)
+                    export_issues(pole)
                 case "histo":
-                    exportHistorique(pole)
+                    export_historique(pole)
