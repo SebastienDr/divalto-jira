@@ -1,5 +1,6 @@
 from jiraone import LOGIN, PROJECT
 from datetime import datetime
+import yaml
 
 
 # L'action à réaliser pour extraire des données (1er filtre)
@@ -8,22 +9,26 @@ def what_action() -> str:
     print(context, "Que voulez-vous faire ? :")
     print(context, "1 - Extraction des tickets".rjust(5))
     print(context, "2 - Extraction de l'historique des tickets".rjust(5))
+    print(context, "3 - Quitter".rjust(5))
     choix = int(input('Choix [2] : ') or 2)
     if choix == 1:
         print("=====> Extraction des tickets")
         context.append("Tickets")
         return "tickets"
-    else:
+    elif choix == 2:
         print("=====> Extraction de l'historique")
         context.append("Historique")
         return "histo"
+    else:
+        print("=====> Au revoir !")
+        return "quit"
 
 
 # Sur quel pole on va réaliser l'action (2ème filtre)
 def what_pole() -> str:
     global context
     print(context, "Pour quel pôle voulez-vous extraire les données ?", ' - '.join(poles))
-    print(context, "ou pour un JQL personnalisé : [perso]")
+    print(context, "ou alors un JQL personnalisé : [perso]")
     chosenPole: str = str(input('Pôle [perso] : ') or "perso")
     if chosenPole != "perso":
         print("=====> Sur le pole", chosenPole, "...")
@@ -63,7 +68,7 @@ def what_time(pole) -> int:
 
 def defineJql() -> str:
     if pole == "perso":
-        return str(input('JQL personnalisé : '))
+        return str(input("JQL personnalisé : "))
     else:
         sprintIn = "Sprint in "
         projectDivalto = "project = DIVALTO AND "
@@ -128,44 +133,55 @@ def exportHistorique(p):
 # Programme principal
 if __name__ == "__main__":
 
-    # Connexion à JIRA
-    user = "sdrouard.ext"
-    password = "SOP1_Avecesar1"
-    link = "https://jira.soprema.ca"
-    LOGIN.api = False  # comment out line, if you want to extract history from a cloud instance
-    LOGIN(user=user, password=password, url=link)
+    with open(r'./properties/stats_jira.yaml', encoding='utf8') as file:
+        # The FullLoader parameter handles the conversion from YAML
+        # scalar values to Python the dictionary format
+        # Chargement des propriétés du programme
+        props = yaml.load(file, Loader=yaml.FullLoader)
 
-    # Gestion des fichiers
-    destinationFolder = "Divalto"
-    extension = ".txt"  # Pour le moment : pour éviter les problèmes d'encoding
-    context = []
+        # Connexion à JIRA Instance
+        LOGIN.api = False  # comment out line, if you want to extract history from a cloud instance
+        LOGIN(user=props.get('jira.user'), password=props.get('jira.password'), url=props.get('jira.link'))
 
-    # Liste des pôles
-    poles = ['SOI', 'SOE', 'FIN', 'SOPCA', 'INFRA']
-    # Et leur sprints actuels
-    sprintsSOE = [255, 257, 258, 265, 267, 272, 273, 282, 290, 292, 295, 296, 297, 305, 319]
-    sprintsSOI = [262, 263, 266, 271, 274, 281, 289, 291, 299, 306, 307, 317, 321, 324]
-    sprintsFIN = [275, 277, 283, 298, 304, 320, 325]
-    sprintsSOPCA = [293, 300, 308, 310, 318, 322, 330]
+        # Gestion des fichiers
+        destinationFolder = props.get('destination.folder')
+        extension = ".txt"  # Pour le moment : pour éviter les problèmes d'encoding
+        context = []
 
-    # Date courante avec heure
-    dateCourante = datetime.now().strftime("%d-%m-%YT%H-%M-%S")
+        # Liste des pôles
+        poles = props.get('divalto.poles')
+        # Et leurs sprints actuels
+        sprintsSOE = props.get('sprintsSOE')
+        sprintsSOI = props.get('sprintsSOI')
+        sprintsFIN = props.get('sprintsFIN')
+        sprintsSOPCA = props.get('sprintsSOPCA')
 
-    # Show "logo"
-    print("=====================================================================================================")
-    print("                                     ", "Divalto JIRA", "                                         ")
-    print("=====================================================================================================")
-    print("Date :", dateCourante)
+        # Date courante avec heure
+        dateCourante = datetime.now().strftime("%d-%m-%YT%H-%M-%S")
 
-    # Changement de la structure d'appel - v0.2
-    action = what_action()
-    pole = what_pole()
-    sprints = what_sprint()
-    time = what_time(pole)
-    jql = defineJql()
-    print(context, "JQL : ", jql)
-    match action:
-        case "tickets":
-            exportIssues(pole)
-        case "histo":
-            exportHistorique(pole)
+        # Show "logo"
+        print("=====================================================================================================")
+        print("                                     ", "Divalto JIRA", "                                         ")
+        print("=====================================================================================================")
+        dateShown = dateCourante.split('T')
+        print("Date :", "Le", dateShown.pop(0), "à", dateShown.pop())
+        if props.get('showProperties'):
+            print("Propriétés :")
+            for x in props:
+                print("".rjust(5), x, "=", props.get(x))
+        print("=====================================================================================================")
+
+        # Changement de la structure d'appel - v0.2
+        # Externalisation des propriétés - v0.3
+        action = what_action()
+        if action != "quit":
+            pole = what_pole()
+            sprints = what_sprint()
+            time = what_time(pole)
+            jql = defineJql()
+            print(context, "JQL : ", jql)
+            match action:
+                case "tickets":
+                    exportIssues(pole)
+                case "histo":
+                    exportHistorique(pole)
