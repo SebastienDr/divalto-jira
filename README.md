@@ -23,5 +23,8 @@ Usage :
 
 Note :
 ------
-- Il faut modifier le reporting.py par défaut de Jiraone car il ne gère pas l'encoding de Windows correctement 
+Etapes d'installation (à automatiser si possible) :
+- Installer python >= 3.6
+- Installer jiraone
+- Modifier le reporting.py par défaut de Jiraone car il ne gère pas l'encoding de Windows correctement 
 (ou alors je n'ai pas encore compris comment lui forcer un encoding particulier)
