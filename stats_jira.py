@@ -1,5 +1,6 @@
 from jiraone import LOGIN, PROJECT
 from datetime import datetime
+from jproperties import Properties
 import yaml
 
 
@@ -27,7 +28,7 @@ def what_action() -> str:
 # Sur quel pole on va réaliser l'action (2ème filtre)
 def what_pole() -> str:
     global context
-    print(context, "Pour quel pôle voulez-vous extraire les données ?", ' - '.join(poles))
+    print(context, "Pour quel pôle voulez-vous extraire les données ?", " - ".join(poles))
     print(context, "ou alors un JQL personnalisé : [perso]")
     chosen_pole: str = str(input('Pôle [perso] : ') or "perso")
     if chosen_pole != "perso":
@@ -139,49 +140,51 @@ if __name__ == "__main__":
         # Chargement des propriétés du programme
         props = yaml.load(file, Loader=yaml.FullLoader)
 
-        # Connexion à JIRA Instance
-        LOGIN.api = False  # comment out line, if you want to extract history from a cloud instance
-        LOGIN(user=props.get('jira.user'), password=props.get('jira.password'), url=props.get('jira.link'))
+    # Connexion à JIRA Instance
+    LOGIN.api = False  # comment out line, if you want to extract history from a cloud instance
+    LOGIN(user=props.get('jira.user'), password=props.get('jira.password'), url=props.get('jira.link'))
 
-        # Gestion des fichiers
-        destinationFolder = props.get('destination.folder')
-        extension = ".txt"  # Pour le moment : pour éviter les problèmes d'encoding
-        context = []
+    # Gestion des fichiers
+    destinationFolder = props.get('destination.folder')
+    extension = ".txt"  # Pour le moment : pour éviter les problèmes d'encoding
+    context = []
 
-        # Liste des pôles
-        poles = props.get('divalto.poles')
-        # Et leurs sprints actuels
-        sprintsSOE = props.get('sprintsSOE')
-        sprintsSOI = props.get('sprintsSOI')
-        sprintsFIN = props.get('sprintsFIN')
-        sprintsSOPCA = props.get('sprintsSOPCA')
+    # Liste des pôles
+    poles = props.get('divalto.poles')
+    # Et leurs sprints actuels
+    sprintsSOE = props.get('soe.sprints')
+    sprintsSOI = props.get('soi.sprints')
+    sprintsFIN = props.get('fin.sprints')
+    sprintsSOPCA = props.get('sopca.sprints')
 
-        # Date courante avec heure
-        dateCourante = datetime.now().strftime("%d-%m-%YT%H-%M-%S")
+    # Date courante avec heure
+    dateCourante = datetime.now().strftime("%d-%m-%YT%H-%M-%S")
 
-        # Show "logo"
-        print("=====================================================================================================")
-        print("                                     ", "Divalto JIRA", "                                         ")
-        print("=====================================================================================================")
-        dateShown = dateCourante.split('T')
-        print("Date :", "Le", dateShown.pop(0), "à", dateShown.pop())
-        if props.get('showProperties'):
-            print("Propriétés :")
-            for x in props:
-                print("".rjust(5), x, "=", props.get(x))
-        print("=====================================================================================================")
+    # Show "logo"
+    print("=====================================================================================================")
+    print("                                     ", "Divalto JIRA", "                                         ")
+    print("=====================================================================================================")
+    dateShown = dateCourante.split('T')
+    print("Date :", "Le", dateShown.pop(0), "à", dateShown.pop())
+    if props.get('show.properties'):
+        print("Propriétés :")
+        prop_view = props.items()
+        print(type(prop_view))
+        for item in prop_view:
+            print("".rjust(5), item[0], '=', item[1].data)
+    print("=====================================================================================================")
 
-        # Changement de la structure d'appel - v0.2
-        # Externalisation des propriétés - v0.3
-        action = what_action()
-        if action != "quit":
-            pole = what_pole()
-            sprints = what_sprint()
-            time = what_time(pole)
-            jql = define_jql()
-            print(context, "JQL : ", jql)
-            match action:
-                case "tickets":
-                    export_issues(pole)
-                case "histo":
-                    export_historique(pole)
+    # Changement de la structure d'appel - v0.2
+    # Externalisation des propriétés - v0.3
+    action = what_action()
+    if action != "quit":
+        pole = what_pole()
+        sprints = what_sprint()
+        time = what_time(pole)
+        jql = define_jql()
+        print(context, "JQL : ", jql)
+        match action:
+            case "tickets":
+                export_issues(pole)
+            case "histo":
+                export_historique(pole)
