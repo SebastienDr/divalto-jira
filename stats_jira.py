@@ -2,6 +2,8 @@ from jiraone import LOGIN, PROJECT
 from datetime import datetime
 import yaml
 
+SPACES = "                                     "
+
 
 # L'action à réaliser pour extraire des données (1er filtre)
 def what_action() -> str:
@@ -27,7 +29,10 @@ def what_action() -> str:
 # Sur quel pole on va réaliser l'action (2ème filtre)
 def what_pole() -> str:
     global context
-    print(context, "Pour quel pôle voulez-vous extraire les données ?", " - ".join(poles))
+    print(
+        context,
+        "Pour quel pôle voulez-vous extraire les données ?", " - ".join(poles)
+    )
     print(context, "ou alors un JQL personnalisé : [perso]")
     chosen_pole: str = str(input('Pôle [perso] : ') or "perso")
     if chosen_pole != "perso":
@@ -44,7 +49,11 @@ def what_sprint() -> str:
     global context, sprints
     print(context, "Sur quel(s) sprint(s) ? :")
     print(context, "1 - Tous".rjust(5))
-    print(context, "2 - Personnalisés - en liste séparé par des ',' (Ex : 215,217,233) -".rjust(5))
+    print(
+        context,
+        "2 - Personnalisés - en liste séparé par des ',' (Ex : "
+        "215,217,233) -".rjust(5)
+    )
     sprints = str(input('Choix [Tous] : ') or "Tous")
     print("=====> Extraction des sprints :", sprints)
     context.append(sprints)
@@ -77,26 +86,31 @@ def define_jql() -> str:
         match pole:
             case 'SOE':
                 if sprints == "Tous":
-                    filter_issues = sprint_in + "(" + ", ".join(map(str, sprintsSOE)) + ")"
+                    filter_issues = sprint_in + "(" + \
+                                    ", ".join(map(str, sprintsSOE)) + ")"
                 else:
                     filter_issues = sprint_in + "(" + sprints + ")"
             case 'FIN':
                 if sprints == "Tous":
-                    filter_issues = sprint_in + "(" + ", ".join(map(str, sprintsFIN)) + ")"
+                    filter_issues = sprint_in + "(" + \
+                                    ", ".join(map(str, sprintsFIN)) + ")"
                 else:
                     filter_issues = sprint_in + "(" + sprints + ")"
             case 'SOI':
                 if sprints == "Tous":
-                    filter_issues = sprint_in + "(" + ", ".join(map(str, sprintsSOI)) + ")"
+                    filter_issues = sprint_in + "(" + \
+                                    ", ".join(map(str, sprintsSOI)) + ")"
                 else:
                     filter_issues = sprint_in + "(" + sprints + ")"
             case 'SOPCA':
                 if sprints == "Tous":
-                    filter_issues = sprint_in + "(" + ", ".join(map(str, sprintsSOPCA)) + ")"
+                    filter_issues = sprint_in + "(" + \
+                                    ", ".join(map(str, sprintsSOPCA)) + ")"
                 else:
                     filter_issues = sprint_in + "(" + sprints + ")"
             case 'INFRA':
-                filter_issues = "labels = DIVALTO_INFRA AND statusCategory not in (Done)"
+                filter_issues = \
+                    "labels = DIVALTO_INFRA AND statusCategory not in (Done)"
             case _:
                 filter_issues = ""
 
@@ -109,7 +123,8 @@ def define_jql() -> str:
             time_str = ""
         else:
             jours = int(input('Depuis combien de jours ? [15] : ') or 15)
-            time_str = " AND (updated > -" + str(jours) + "d OR updatedDate > -" + str(jours) + "d)"
+            time_str = " AND (updated > -" + str(jours) + \
+                       "d OR updatedDate > -" + str(jours) + "d)"
 
         future_jql = project_divalto + filter_issues + time_str
     return future_jql
@@ -118,16 +133,31 @@ def define_jql() -> str:
 # Tickets
 def export_issues(p):
     text = [dateCourante, str(p), "Tickets"]
-    file_name = '_'.join(text) + extension  # Fichier de sortie des données des tickets
+    # Fichier de sortie des données des tickets
+    file_name = '_'.join(text) + extension
     print(file_name)
-    PROJECT.export_issues(jql=jql, folder=destinationFolder, final_file=file_name)
+    PROJECT.export_issues(
+        jql=jql,
+        folder=destinationFolder,
+        final_file=file_name
+    )
 
 
 # Historique des tickets
 def export_historique(p):
     text = [dateCourante, str(p), "Historique"]
-    file_name_histo = '_'.join(text)  # Fichier de sortie des données de l'historique des tickets
-    PROJECT.change_log(jql=jql, folder=destinationFolder, file=file_name_histo + extension)
+    # Fichier de sortie des données de l'historique des tickets
+    file_name_histo = '_'.join(text)
+    PROJECT.change_log(
+        jql=jql,
+        folder=destinationFolder,
+        file=file_name_histo + extension
+    )
+
+
+def print_longline():
+    print("======================================" +
+          "===============================================================")
 
 
 # Programme principal
@@ -140,8 +170,12 @@ if __name__ == "__main__":
         props = yaml.load(file, Loader=yaml.FullLoader)
 
     # Connexion à JIRA Instance
-    LOGIN.api = False  # comment out line, if you want to extract history from a cloud instance
-    LOGIN(user=props.get('jira.user'), password=props.get('jira.password'), url=props.get('jira.link'))
+    LOGIN.api = False
+    LOGIN(
+        user=props.get('jira.user'),
+        password=props.get('jira.password'),
+        url=props.get('jira.link')
+    )
 
     # Gestion des fichiers
     destinationFolder = props.get('destination.folder')
@@ -160,9 +194,9 @@ if __name__ == "__main__":
     dateCourante = datetime.now().strftime("%d-%m-%YT%H-%M-%S")
 
     # Show "logo"
-    print("=====================================================================================================")
-    print("                                     ", "Divalto JIRA", "                                         ")
-    print("=====================================================================================================")
+    print_longline()
+    print(SPACES, "Divalto JIRA", SPACES)
+    print_longline()
     dateShown = dateCourante.split('T')
     print("Date :", "Le", dateShown.pop(0), "à", dateShown.pop())
     if props.get('show.properties'):
@@ -171,7 +205,7 @@ if __name__ == "__main__":
         print(type(prop_view))
         for item in prop_view:
             print("".rjust(5), item[0], '=', item[1].data)
-    print("=====================================================================================================")
+    print_longline()
 
     # Changement de la structure d'appel - v0.2
     # Externalisation des propriétés - v0.3
