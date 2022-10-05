@@ -1,0 +1,12 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+jiraone = "0.7.1"
+auto-py-to-exe = "2.23.1"
+jproperties = "2.1.1"
+
+[requires]
+python_full_version = "3.10.7"
