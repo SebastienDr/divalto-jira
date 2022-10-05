@@ -925,8 +925,8 @@ class Projects:
                 infinity_counter += 1
                 data_brick.update({"iter": infinity_counter, "key": keys})
                 project_key = keys.split("-")[0]
-                json.dump(data_brick, open(f"{path_builder(path=folder, file_name=saved_file)}",
-                                           encoding='utf-8', mode='w+'), indent=4) if allow_cp is True else None
+                # json.dump(data_brick, open(f"{path_builder(path=folder, file_name=saved_file)}",
+                #                           encoding='utf-8', mode='w+'), indent=4) if allow_cp is True else None
                 if back_up is True and keys != set_up["key"] and loop is False:
                     re_instantiate(set_up["key"])
 
