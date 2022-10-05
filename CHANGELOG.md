@@ -30,3 +30,9 @@ v0.3
     feat: added choose sprint option
     note: removed R&D pole
     feat: added timestamp to files extracts
+
+v0.4
+
+    05 Oct 2022
+    feat: externalized properties. You can now connect to your own JIRA with your credentials
+    note: code cleaned a bit to respect python code style
