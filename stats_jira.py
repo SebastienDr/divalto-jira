@@ -1,6 +1,5 @@
 from jiraone import LOGIN, PROJECT
 from datetime import datetime
-from jproperties import Properties
 import yaml
 
 
